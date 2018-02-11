@@ -3,8 +3,9 @@
 . lib/util.sh
 eval "`include_once field.sh`"
 eval "`include_once draw.sh`"
+eval "`include_once enemies.sh`"
 
-# Player coords. Initial coords are guaranted to be valid and not inside the wall
+# Player coords
 
 declare -g px=1
 declare -g py=1
@@ -12,6 +13,10 @@ declare -g py=1
 # Player direction
 
 declare -g pd=right
+
+# Player HP
+
+declare -g ph=10
 
 function try_move_player_to() {
     if ! isinteger $1 || ! isinteger $2; then
@@ -52,10 +57,21 @@ function move_player() {
     esac
 }
 
+function player_hit() {
+    (( --ph ))
+    if [ $ph -le 0 ]; then
+        echo -e "\e[16;0H\e[1;31mYou died!\e[0m"
+        echo "Press Enter to exit"
+        read -s
+        exit 0
+    fi
+}
+
 while true; do
     clear
     draw_field_with_player
     draw_controls
+    draw_enemies
     read -sN 1 key
     case $key in
     q)
@@ -76,4 +92,5 @@ while true; do
     *)
         continue
     esac
+    move_enemies
 done

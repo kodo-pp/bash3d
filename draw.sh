@@ -37,26 +37,70 @@ function put_player() {
     echo -ne ' \e[0m'
 }
 
+function put_enemy() {
+    local ex=${enemies_x[$1]}
+    local ey=${enemies_y[$1]}
+
+    echo -ne "\e[$(($ey+2));$(($ex*2 + 2))H"
+    echo -ne '\e[1;31m@ \e[0m'
+}
+
+function put_field() {
+    if [ "${field[$1]}" == "#" ]; then
+        echo -ne "\e[1m#\e[0m "
+    else
+        echo -n "  "
+    fi
+    return 0
+}
+
+function draw_enemies() {
+    for (( i=0; $i<$enemies_count; ++i )) {
+        put_enemy $i
+    }
+    echo -ne '\e[40;0H'
+}
+
 function _draw_field() {
     # Fast version, does not parse coords every time
 
     # Player
     local player_idx=`get_field_idx $px $py`
 
-    for (( i=0; i<field_len; ++i )); do
+    for (( i=0; $i<$((2*$field_width + 2)); ++i )); do
+        echo -n '#'
+    done
+    echo
+    echo -n '#'
+    for (( i=0; $i<$field_len; ++i )); do
         if [ $(( $i % $field_width )) == 0 ] && [ $i -ne 0 ]; then
-            echo
+            echo -ne '#\n#'
         fi
         if [ "$1" == "-p" -a "$i" == "$player_idx" ]; then
             put_player
         else
-            echo -n "${field[$i]} "
+            put_field $i
         fi
     done
     echo
+    for (( i=0; $i<$((2*$field_width + 2)); ++i )); do
+        echo -n '#'
+    done
+    echo
+}
+
+function put_hp() {
+    echo -n 'HP: '
+    for (( i=0; $i<$ph; ++i )); do
+        echo -ne '\e[1;31m\u2589\e[0m'
+    done
+    for (( i=$ph; $i<10; ++i )); do
+        echo -ne '\e[37m\u2589\e[0m'
+    done
 }
 
 function draw_controls() {
     echo "[w], [a], [s], [d] - move"
     echo "[q] - quit"
+    put_hp
 }

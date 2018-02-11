@@ -28,32 +28,35 @@ function get_field_idx() {
 # --- Field preparation ---
 
 # Human-readable format
-_field="
-# # # # # # # # # #
-# . . . . . . . . #
-# . . # # . . # . #
-# . . . . . . . . #
-# . # # # . . # . #
-# . # # . . . . . #
-# . . # . . . . . #
-# . . . . # . . . #
-# . . . # # . . . #
-# # # # # # # # # #"
-
-# Some constants
-declare -gr field_width=10
-declare -gr field_height=10
-declare -gr field_len=$(($field_width * $field_height))
+#_field="
+## # # # # # # # # #
+## . . . . . . . . #
+## . . # # . . # . #
+## . . . . . . . . #
+## . # # # . . # . #
+## . # # . . . . . #
+## . . # . . . . . #
+## . . . . # . . . #
+## . . . # # . . . #
+## # # # # # # # # #"
 
 # One-dimensional array. Point (x; y) is field[$(( $x + $y * $field_width ))]
 declare -ag field
 
-# Transform data from human-readable format to one-dimensional array
-idx=0
-for i in $_field; do
-    field[$idx]=$i
-    (( ++idx ))
+# Some constants
+declare -gr field_width=30
+declare -gr field_height=30
+declare -gr field_len=$(($field_width * $field_height))
+
+for (( i=0; $i < $field_len; ++i )); do
+    if [ $(( $RANDOM % 1000 )) -lt 230 ]; then
+        field[$i]='#'
+    else
+        field[$i]='.'
+    fi
 done
+
+
 
 # Clean up
 unset idx
