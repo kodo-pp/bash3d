@@ -1,1 +1,6 @@
-# A 3d (not yet) game written entirely on bash
+# A (not yet) 3d game written entirely on bash
+
+## Running:
+
+`./main.sh`
+
