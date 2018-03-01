@@ -82,7 +82,7 @@ function _draw_field() {
             put_field $i
         fi
     done
-    echo
+    echo -e "\e[$(($field_height + 1));$((2 * $field_width + 2))H#"
     for (( i=0; $i<$((2*$field_width + 2)); ++i )); do
         echo -n '#'
     done

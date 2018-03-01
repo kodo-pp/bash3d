@@ -60,7 +60,9 @@ function move_player() {
 function player_hit() {
     (( --ph ))
     if [ $ph -le 0 ]; then
-        echo -e "\e[16;0H\e[1;31mYou died!\e[0m"
+        echo -en "\e[$(($field_height + 6));0H\e[1;31m"
+        toilet 'You died!'
+        echo -en "\e[0m"
         echo "Press Enter to exit"
         read -s
         exit 0
