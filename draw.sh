@@ -89,6 +89,11 @@ function _draw_field() {
     echo
 }
 
+function draw_player() {
+    echo -ne "\e[$(($py + 2));$((2 * $px + 2))H"
+    put_player
+}
+
 function put_hp() {
     echo -n 'HP: '
     for (( i=0; $i<$ph; ++i )); do
@@ -100,6 +105,7 @@ function put_hp() {
 }
 
 function draw_controls() {
+    echo -ne "\e[$(($field_height + 3));0H"
     echo "[w], [a], [s], [d] - move"
     echo "[q] - quit"
     put_hp

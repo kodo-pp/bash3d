@@ -23,13 +23,14 @@ function try_move_player_to() {
         print_ferror "arguments must be integers"
         return 1
     fi
-    if [ $1 -lt 0 -o $2 -lt 0 -o $1 -ge $field_width -o $1 -ge $field_height ]; then
+    if [ $1 -lt 0 ] || [ $2 -lt 0 ] || [ $1 -ge $field_width ] || [ $2 -ge $field_height ]; then
         return 1
     fi
     local field_idx=`get_field_idx $1 $2`
     if [ ${field[$field_idx]} == '#' ]; then
         return 1
     else
+        echo -ne "\e[$(($py + 2));$((2 * $px + 2))H "
         px=$1
         py=$2
         pd=$3
@@ -65,15 +66,22 @@ function player_hit() {
         echo -en "\e[0m"
         echo "Press Enter to exit"
         read -s
+        stty echo
+        echo -e "\e[?25h"
         exit 0
     fi
 }
 
+trap 'echo -e "\e[?25h"; stty echo; exit 127' SIGINT # TODO: НЕ РАБОТАЕТ!!!!!!
+
+stty -echo
+echo -e '\e[?25l' # Hide cursor
+clear
+draw_field_with_player
 while true; do
-    clear
-    draw_field_with_player
-    draw_controls
     draw_enemies
+    draw_player
+    draw_controls
     read -sN 1 key
     case $key in
     q)

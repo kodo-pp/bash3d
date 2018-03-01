@@ -8,7 +8,7 @@ eval "`include_once field.sh`"
 # TODO: randomize
 declare -ag enemies_x=(8 18 21 7 19 22 6 14 27)
 declare -ag enemies_y=(28 1 18 29 2 16 28 3 16)
-declare -ag enemies_d=(up down up)
+declare -ag enemies_d=(up down up right down down up left up)
 declare -g  enemies_count=9
 
 function try_move_enemy_to() {
@@ -23,6 +23,9 @@ function try_move_enemy_to() {
     if [ ${field[$field_idx]} == '#' ]; then
         return 1
     else
+        local ex=${enemies_x[$4]}
+        local ey=${enemies_y[$4]}
+        echo -ne "\e[$(($ey + 2));$((2 * $ex + 2))H "
         enemies_x[$4]=$1
         enemies_y[$4]=$2
         enemies_d[$4]=$3
