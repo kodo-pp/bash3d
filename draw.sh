@@ -111,5 +111,11 @@ function draw_controls() {
     echo "[e] - shoot (wallbuster)"
     echo "[r] - shoot (laser)"
     echo "[q] - quit"
+    echo "pts: $pts"
+    echo "cyc: $cyc"
+    echo "ape: $(echo | awk "{print $pts * 10000 / $cyc}" | xargs printf '%.2f\n')"
+    echo "---"
+    echo "las: $las"
+    echo "acc: $(if [ $las -gt 0 ]; then echo | awk "{print $pts * 100 / $las}" | xargs printf '%.2f%%\n'; else echo '<...>'; fi)"
     put_hp
 }

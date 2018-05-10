@@ -5,6 +5,10 @@ eval "`include_once field.sh`"
 eval "`include_once draw.sh`"
 eval "`include_once enemies.sh`"
 
+pts=0
+cyc=1
+las=0
+
 # Player coords
 
 declare -g px=1
@@ -65,6 +69,11 @@ function player_hit() {
         echo -en "\e[$(($field_height + 6));0H\e[1;31m"
         toilet 'You died!'
         echo -en "\e[0m"
+        echo "Result: you died"
+        echo "Points: $pts"
+        echo "Cycles: $cyc"
+        echo "Accurracy: $(if [ $las -gt 0 ]; then echo | awk "{print $pts * 100 / $las}" | xargs printf '%.2f%%\n'; else echo '<...>'; fi)"
+        echo "Avg. pt. earn: $(echo | awk "{print $pts * 10000 / $cyc}" | xargs printf '%.2f\n')"
         echo "Press Enter to exit"
         read -s
         stty echo
@@ -147,6 +156,7 @@ function shoot_player() {
 }
 
 function shoot_player_laser() {
+    (( ++las ))
     aplay laser.rawsound &>/dev/null &
     local dx=0
     local dy=0
@@ -182,9 +192,10 @@ function shoot_player_laser() {
             echo -ne "\e[$(($y+2));$(($x*2 + 2))H"
             echo -ne '\e[1;31m'
             enm=`hits_enemy $x $y`
-            enemies_x[$enm]=$(( $RANDOM % $field_width ))
-            enemies_y[$enm]=$(( $RANDOM % $field_height ))
             if ! [ -z "$enm" ]; then
+                (( ++pts ))
+                enemies_x[$enm]=$(( $RANDOM % $field_width ))
+                enemies_y[$enm]=$(( $RANDOM % $field_height ))
                 case $pd in
                     up|down)
                         echo -n '$'
@@ -246,6 +257,11 @@ while true; do
         read ans
         case $ans in
             y|yes)
+                echo "Result: you gave up"
+                echo "Points: $pts"
+                echo "Cycles: $cyc"
+                echo "Accurracy: $(if [ $las -gt 0 ]; then echo | awk "{print $pts * 100 / $las}" | xargs printf '%.2f%%\n'; else echo '<...>'; fi)"
+                echo "Avg. pt. earn: $(echo | awk "{print $pts * 10000 / $cyc}" | xargs printf '%.2f\n')"
                 exit 0
                 ;;
         esac
@@ -255,24 +271,31 @@ while true; do
         draw_field_with_player
         ;;
     z)
+        (( ++cyc ))
         true
         ;;
     w)
+        (( ++cyc ))
         move_player up
         ;;
     a)
+        (( ++cyc ))
         move_player left
         ;;
     d)
+        (( ++cyc ))
         move_player right
         ;;
     s)
+        (( ++cyc ))
         move_player down
         ;;
     e)
+        (( ++cyc ))
         shoot_player
         ;;
     r)
+        (( ++cyc ))
         shoot_player_laser
         ;;
     *)
