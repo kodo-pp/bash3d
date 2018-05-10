@@ -107,6 +107,8 @@ function put_hp() {
 function draw_controls() {
     echo -ne "\e[$(($field_height + 3));0H"
     echo "[w], [a], [s], [d] - move"
+    echo "[z] - idle"
+    echo "[e] - shoot (be careful!)"
     echo "[q] - quit"
     put_hp
 }

@@ -76,11 +76,25 @@ function move_enemy() {
 function move_enemies() {
     local chance=30
     for (( i=0; $i<$enemies_count; ++i )); do
-        if [ $(( $RANDOM % 100 )) -lt $chance ]; then
+        if [ ${enemies_x[$i]} == $px ]; then
+            if [ ${enemies_y[$i]} -lt $py ]; then
+                enemies_d[$i]=down
+            else
+                enemies_d[$i]=up
+            fi
+        elif [ ${enemies_y[$i]} == $py ]; then
+            if [ ${enemies_x[$i]} -lt $px ]; then
+                enemies_d[$i]=right
+            else
+                enemies_d[$i]=left
+            fi
+        elif [ $(( $RANDOM % 100 )) -lt $chance ]; then
             enemies_d[$i]=`get_random_direction`
         fi
 
-        move_enemy $i
+        if [ $(( $RANDOM % 100 )) -lt 80 ]; then
+            move_enemy $i
+        fi
 
         if [ ${enemies_x[$i]} == $px -a ${enemies_y[$i]} == $py ]; then
             player_hit
