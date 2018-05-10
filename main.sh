@@ -97,6 +97,10 @@ function shoot_player() {
             (( j -= $dy * 2 ))
             break
         fi
+        if [ $x -ne $px -o $y -ne $py ]; then
+            echo -ne "\e[$(($y+2));$(($x*2 + 2))H"
+            echo -ne '\e[1;33m**\e[0m'
+        fi
         local field_idx=`get_field_idx $x $y`
         if [ ${field[$field_idx]} == '#' ]; then
             break
