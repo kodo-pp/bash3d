@@ -59,6 +59,7 @@ function move_player() {
 }
 
 function player_hit() {
+    aplay hit.rawsound &>/dev/null &
     (( --ph ))
     if [ $ph -le 0 ]; then
         echo -en "\e[$(($field_height + 6));0H\e[1;31m"
@@ -73,6 +74,7 @@ function player_hit() {
 }
 
 function shoot_player() {
+    aplay wallbuster.rawsound &>/dev/null &
     local dx=0
     local dy=0
     case $pd in
@@ -139,7 +141,87 @@ function shoot_player() {
         done
     done
     field[`get_field_idx $x $y`]='.'
-    sleep 1
+    sleep 0.5
+    clear
+    draw_field_with_player
+}
+
+function shoot_player_laser() {
+    aplay laser.rawsound &>/dev/null &
+    local dx=0
+    local dy=0
+    case $pd in
+        up)
+            dy=-1
+            ;;
+        down)
+            dy=1
+            ;;
+        right)
+            dx=1
+            ;;
+        left)
+            dx=-1
+            ;;
+    esac
+    local x=$px
+    local y=$py
+    while true; do
+        if [ $x -lt 0 -o $y -lt 0 -o $x -ge $field_width -o $y -ge $field_height ]; then
+            (( x -= $dx ))
+            (( j -= $dy ))
+            break
+        fi
+        local field_idx=`get_field_idx $x $y`
+        if [ ${field[$field_idx]} == '#' ]; then
+            (( x -= $dx ))
+            (( j -= $dy ))
+            break
+        fi
+        if [ $x -ne $px -o $y -ne $py ]; then
+            echo -ne "\e[$(($y+2));$(($x*2 + 2))H"
+            echo -ne '\e[1;31m'
+            enm=`hits_enemy $x $y`
+            enemies_x[$enm]=$(( $RANDOM % $field_width ))
+            enemies_y[$enm]=$(( $RANDOM % $field_height ))
+            if ! [ -z "$enm" ]; then
+                case $pd in
+                    up|down)
+                        echo -n '$'
+                        ;;
+                    left|right)
+                        echo -n '$-'
+                        ;;
+                esac
+            else
+                case $pd in
+                    up|down)
+                        echo -n '|'
+                        ;;
+                    left|right)
+                        echo -n '--'
+                        ;;
+                esac
+            fi
+            echo -ne '\e[0m'
+        fi
+        (( x += $dx ))
+        (( y += $dy ))
+    done
+
+    if [ $x -lt 0 ]; then
+        x=0
+    elif [ $x -ge $field_width ]; then
+        x=$(($field_width - 1))
+    fi
+
+    if [ $y -lt 0 ]; then
+        y=0
+    elif [ $y -ge $field_height ]; then
+        y=$(($field_height - 1))
+    fi
+
+    sleep 0.5
     clear
     draw_field_with_player
 }
@@ -189,6 +271,9 @@ while true; do
         ;;
     e)
         shoot_player
+        ;;
+    r)
+        shoot_player_laser
         ;;
     *)
         continue

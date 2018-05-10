@@ -50,6 +50,15 @@ function get_random_direction() {
     esac
 }
 
+function hits_enemy() {
+    for (( i = 0; i < enemies_count; ++i )); do
+        if [ ${enemies_x[$i]} == $1 -a ${enemies_y[$i]} == $2 ]; then
+            echo $i
+            return
+        fi
+    done
+}
+
 function move_enemy() {
     ex=${enemies_x[$1]}
     ey=${enemies_y[$1]}
