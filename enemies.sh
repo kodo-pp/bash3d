@@ -85,6 +85,25 @@ function move_enemy() {
 function move_enemies() {
     local chance=30
     for (( i=0; $i<$enemies_count; ++i )); do
+        local ddx=$((${enemies_x[$i]} - $px))
+        local ddy=$((${enemies_y[$i]} - $py))
+        local qdist=$(( ($ddx) * ($ddx) + ($ddy) * ($ddy) ))
+        if [ $qdist -le 36 ]; then
+            if [ $(( $RANDOM % 2 )) == 1 ]; then
+                if [ ${enemies_x[$i]} -lt $px ]; then
+                    enemies_d[$i]=right
+                else
+                    enemies_d[$i]=left
+                fi
+            else
+                if [ ${enemies_y[$i]} -lt $py ]; then
+                    enemies_d[$i]=down
+                else
+                    enemies_d[$i]=up
+                fi
+            fi
+        fi
+
         if [ ${enemies_x[$i]} == $px ]; then
             if [ ${enemies_y[$i]} -lt $py ]; then
                 enemies_d[$i]=down

@@ -155,6 +155,79 @@ function shoot_player() {
     draw_field_with_player
 }
 
+function shoot_player_grow() {
+    aplay wallbuster.rawsound &>/dev/null &
+    local dx=0
+    local dy=0
+    case $pd in
+        up)
+            dy=-1
+            ;;
+        down)
+            dy=1
+            ;;
+        right)
+            dx=1
+            ;;
+        left)
+            dx=-1
+            ;;
+    esac
+    local x=$px
+    local y=$py
+    while true; do
+        if [ $x -lt 0 -o $y -lt 0 -o $x -ge $field_width -o $y -ge $field_height ]; then
+            (( x -= $dx * 2 ))
+            (( j -= $dy * 2 ))
+            break
+        fi
+        if [ $x -ne $px -o $y -ne $py ]; then
+            echo -ne "\e[$(($y+2));$(($x*2 + 2))H"
+            echo -ne '\e[1;33m**\e[0m'
+        fi
+        local field_idx=`get_field_idx $x $y`
+        if [ ${field[$field_idx]} == '#' ]; then
+            break
+        fi
+        (( x += $dx ))
+        (( y += $dy ))
+    done
+
+    if [ $x -lt 0 ]; then
+        x=0
+    elif [ $x -ge $field_width ]; then
+        x=$(($field_width - 1))
+    fi
+
+    if [ $y -lt 0 ]; then
+        y=0
+    elif [ $y -ge $field_height ]; then
+        y=$(($field_height - 1))
+    fi
+
+    for i in 0 1 2; do
+        for j in 0 1 2; do
+            xx=$(($x+$i-1))
+            yy=$(($y+$j-1))
+            if ! [ $xx -lt 0 -o $yy -lt 0 -o $xx -ge $field_width -o $yy -ge $field_height ]; then
+                echo -ne "\e[$(($yy+2));$(($xx*2 + 2))H"
+                echo -ne '\e[1;43;31mxx\e[0m'
+                field[`get_field_idx $xx $yy`]='#'
+                if [ $xx == $px -a $yy == $py ]; then
+                    player_hit
+                    player_hit
+                    player_hit
+                fi
+            fi
+            sleep 0.01
+        done
+    done
+    field[`get_field_idx $x $y`]='#'
+    sleep 0.5
+    clear
+    draw_field_with_player
+}
+
 function shoot_player_laser() {
     (( ++las ))
     aplay laser.rawsound &>/dev/null &
@@ -244,6 +317,22 @@ echo -e '\e[?25l' # Hide cursor
 clear
 draw_field_with_player
 while true; do
+    if [ $(( $RANDOM % 3 )) == 0 ]; then
+        wx=$(( $RANDOM % $field_width ))
+        wy=$(( $RANDOM % $field_height ))
+        fii=`get_field_idx $wx $wy`
+        field[$fii]='#'
+        echo -ne "\e[$(($wy+2));$(($wx*2 + 2))H"
+        echo -ne '\e[0;1m# \e[0m'
+    fi
+
+    if [ $(( $cyc % 20 )) == 0 ]; then
+        enemies_x[$enemies_count]=$(( $RANDOM % $field_width ))
+        enemies_y[$enemies_count]=$(( $RANDOM % $field_height ))
+        enemies_d[$enemies_count]=up
+        (( ++enemies_count ))
+    fi
+
     draw_player
     draw_enemies
     draw_controls
@@ -293,6 +382,10 @@ while true; do
     e)
         (( ++cyc ))
         shoot_player
+        ;;
+    f)
+        (( ++cyc ))
+        shoot_player_grow
         ;;
     r)
         (( ++cyc ))
