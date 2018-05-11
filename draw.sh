@@ -109,6 +109,7 @@ function draw_controls() {
     echo "[w], [a], [s], [d] - move"
     echo "[z] - idle"
     echo "[e] - shoot (wallbuster)"
+    echo "[f] - shoot (wallgrower)"
     echo "[r] - shoot (laser)"
     echo "[q] - quit"
     echo "pts: $pts"

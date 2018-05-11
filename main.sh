@@ -69,9 +69,9 @@ function player_hit() {
         echo -en "\e[$(($field_height + 6));0H\e[1;31m"
         toilet 'You died!'
         echo -en "\e[0m"
-        echo "Result: you died"
-        echo "Points: $pts"
-        echo "Cycles: $cyc"
+        echo "Result: you died                    "
+        echo "Points: $pts                        "
+        echo "Cycles: $cyc                        "
         echo "Accurracy: $(if [ $las -gt 0 ]; then echo | awk "{print $pts * 100 / $las}" | xargs printf '%.2f%%\n'; else echo '<...>'; fi)"
         echo "Avg. pt. earn: $(echo | awk "{print $pts * 10000 / $cyc}" | xargs printf '%.2f\n')"
         echo "Press Enter to exit"
