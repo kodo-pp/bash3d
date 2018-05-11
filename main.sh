@@ -22,6 +22,21 @@ declare -g pd=right
 
 declare -g ph=10
 
+function sb_write() {
+    echo -n "Enter your name: "
+    read name
+    touch scoreboard
+    cat scoreboard > scoreboard.tmp
+    echo "$(( ($pts * 1000000 / $cyc) * $pts )) $name" >> scoreboard.tmp
+    sort -rn scoreboard.tmp | head -n 10 > scoreboard
+    rm scoreboard.tmp
+    echo 'Scoreboard:'
+    cat scoreboard | for (( i = 0; i < 10; i++ )); do
+        read ape name || break
+        echo "#$i $(echo | awk "{print $ape / 100}") $name"
+    done | column -t
+}
+
 function try_move_player_to() {
     if ! isinteger $1 || ! isinteger $2; then
         print_ferror "arguments must be integers"
@@ -74,10 +89,12 @@ function player_hit() {
         echo "Cycles: $cyc                        "
         echo "Accurracy: $(if [ $las -gt 0 ]; then echo | awk "{print $pts * 100 / $las}" | xargs printf '%.2f%%\n'; else echo '<...>'; fi)"
         echo "Avg. pt. earn: $(echo | awk "{print $pts * 10000 / $cyc}" | xargs printf '%.2f\n')"
+        echo "Total score: $(echo | awk "{print ($pts * 10000 / $cyc) * $pts}" | xargs printf '%.2f\n')"
+        stty echo
+        echo -ne "\e[?25h"
+        sb_write
         echo "Press Enter to exit"
         read -s
-        stty echo
-        echo -e "\e[?25h"
         exit 0
     fi
 }
@@ -183,7 +200,7 @@ function shoot_player_grow() {
         fi
         if [ $x -ne $px -o $y -ne $py ]; then
             echo -ne "\e[$(($y+2));$(($x*2 + 2))H"
-            echo -ne '\e[1;33m**\e[0m'
+            echo -ne '\e[1;32m**\e[0m'
         fi
         local field_idx=`get_field_idx $x $y`
         if [ ${field[$field_idx]} == '#' ]; then
@@ -211,7 +228,7 @@ function shoot_player_grow() {
             yy=$(($y+$j-1))
             if ! [ $xx -lt 0 -o $yy -lt 0 -o $xx -ge $field_width -o $yy -ge $field_height ]; then
                 echo -ne "\e[$(($yy+2));$(($xx*2 + 2))H"
-                echo -ne '\e[1;43;31mxx\e[0m'
+                echo -ne '\e[1;34m##\e[0m'
                 field[`get_field_idx $xx $yy`]='#'
                 if [ $xx == $px -a $yy == $py ]; then
                     player_hit
@@ -351,6 +368,8 @@ while true; do
                 echo "Cycles: $cyc"
                 echo "Accurracy: $(if [ $las -gt 0 ]; then echo | awk "{print $pts * 100 / $las}" | xargs printf '%.2f%%\n'; else echo '<...>'; fi)"
                 echo "Avg. pt. earn: $(echo | awk "{print $pts * 10000 / $cyc}" | xargs printf '%.2f\n')"
+                echo "Total score: $(echo | awk "{print ($pts * 10000 / $cyc) * $pts}" | xargs printf '%.2f\n')"
+                sb_write
                 exit 0
                 ;;
         esac
@@ -390,6 +409,10 @@ while true; do
     r)
         (( ++cyc ))
         shoot_player_laser
+        ;;
+    r)
+        (( ++cyc ))
+        shoot_player_lightning
         ;;
     *)
         continue

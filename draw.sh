@@ -115,6 +115,7 @@ function draw_controls() {
     echo "pts: $pts"
     echo "cyc: $cyc"
     echo "ape: $(echo | awk "{print $pts * 10000 / $cyc}" | xargs printf '%.2f\n')"
+    echo "tot: $(echo | awk "{print ($pts * 10000 / $cyc) * $pts}" | xargs printf '%.2f\n')"
     echo "---"
     echo "las: $las"
     echo "acc: $(if [ $las -gt 0 ]; then echo | awk "{print $pts * 100 / $las}" | xargs printf '%.2f%%\n'; else echo '<...>'; fi)"
